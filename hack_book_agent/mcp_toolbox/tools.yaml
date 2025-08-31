@@ -1,0 +1,50 @@
+sources:
+  my-cloud-sql-pg-source:
+    kind: cloud-sql-postgres
+    project: agenthack-medtech-mothership
+    database: book-db
+    region: us-central1
+    instance: book-db-instance
+    user: toolbox-sa@agenthack-medtech-mothership.iam
+
+tools:
+  search-isbn-code-by-book-title:
+    kind: postgres-sql
+    source: my-cloud-sql-pg-source
+    description: Use this tool to get the ISBN code of a specific book. Take a book title as input and return the ISBN code. A book title is lowercase. For example, if given "Harry Potter and the Philosopher's Stone", the book_title is "harry potter and the philosopher's stone". Another example is if given "The Great Gatsby", the book_title is "the great gatsby".
+    parameters:
+      - name: book_title
+        type: string
+        description: The title of the book in lowercase.
+    statement: SELECT isbn FROM books WHERE title = $1;
+
+  #library-related-tools
+  search-book-in-library-by-isbn:
+    kind: postgres-sql
+    source: my-cloud-sql-pg-source
+    description: Use this tool to check if a book is in the library inventory. Take an ISBN code as input and return whether the book is available.
+    parameters:
+      - name: isbn
+        type: string
+        description: The ISBN code of the book.
+    statement: SELECT EXISTS(SELECT 1 FROM libraryinventory WHERE isbn = $1);
+
+  search-number-of-copies:
+    kind: postgres-sql
+    source: my-cloud-sql-pg-source
+    description: Use this tool to get the number of copies of a book in the library. Take an ISBN code as input and return the number of copies.
+    parameters:
+      - name: isbn
+        type: string
+        description: The ISBN code of the book.
+    statement: SELECT availablecopies FROM libraryinventory WHERE isbn = $1;
+
+  search-book-location:
+    kind: postgres-sql
+    source: my-cloud-sql-pg-source
+    description: Use this tool to get the location of a book in the library. Take an ISBN code as input and return the location.
+    parameters:
+      - name: isbn
+        type: string
+        description: The ISBN code of the book.
+    statement: SELECT location FROM libraryinventory WHERE isbn = $1;
